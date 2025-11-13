@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "react-native-background-call": ["../src/index"],
+      "react-native-background-call/*": ["../src/*"]
+    }
+  }
+}
