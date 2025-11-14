@@ -1,7 +1,7 @@
 {
   "name": "react-native-background-call",
   "version": "0.1.0",
-  "description": "My new module",
+  "description": "Keep calls running in the background",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
@@ -19,7 +19,12 @@
     "react-native",
     "expo",
     "react-native-background-call",
-    "ReactNativeBackgroundCall"
+    "ReactNativeBackgroundCall",
+    "call",
+    "background",
+    "foreground service",
+    "video call",
+    "voice call"
   ],
   "repository": "https://github.com/nucleartux/react-native-background-call",
   "bugs": {

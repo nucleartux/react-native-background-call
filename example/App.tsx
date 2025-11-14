@@ -1,36 +1,27 @@
-import { useEvent } from 'expo';
-import ReactNativeBackgroundCall, { ReactNativeBackgroundCallView } from 'react-native-background-call';
-import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { useEvent } from "expo";
+import BackgroundCall from "react-native-background-call";
+import { Button, SafeAreaView, ScrollView, Text, View } from "react-native";
 
 export default function App() {
-  const onChangePayload = useEvent(ReactNativeBackgroundCall, 'onChange');
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
         <Text style={styles.header}>Module API Example</Text>
-        <Group name="Constants">
-          <Text>{ReactNativeBackgroundCall.PI}</Text>
-        </Group>
         <Group name="Functions">
-          <Text>{ReactNativeBackgroundCall.hello()}</Text>
-        </Group>
-        <Group name="Async functions">
           <Button
-            title="Set value"
-            onPress={async () => {
-              await ReactNativeBackgroundCall.setValueAsync('Hello from JS!');
+            title="Start"
+            onPress={() => {
+              BackgroundCall.startForegroundService({
+                title: "Video Call",
+                message: "Call in progress",
+              });
             }}
           />
-        </Group>
-        <Group name="Events">
-          <Text>{onChangePayload?.value}</Text>
-        </Group>
-        <Group name="Views">
-          <ReactNativeBackgroundCallView
-            url="https://www.example.com"
-            onLoad={({ nativeEvent: { url } }) => console.log(`Loaded: ${url}`)}
-            style={styles.view}
+          <Button
+            title="Stop"
+            onPress={() => {
+              BackgroundCall.stopForegroundService();
+            }}
           />
         </Group>
       </ScrollView>
@@ -58,13 +49,13 @@ const styles = {
   },
   group: {
     margin: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
   },
   container: {
     flex: 1,
-    backgroundColor: '#eee',
+    backgroundColor: "#eee",
   },
   view: {
     flex: 1,

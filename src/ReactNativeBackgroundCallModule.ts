@@ -1,12 +1,16 @@
-import { NativeModule, requireNativeModule } from 'expo';
+import { NativeModule, requireNativeModule } from "expo";
 
-import { ReactNativeBackgroundCallModuleEvents } from './ReactNativeBackgroundCall.types';
-
-declare class ReactNativeBackgroundCallModule extends NativeModule<ReactNativeBackgroundCallModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+declare class ReactNativeBackgroundCallModule extends NativeModule {
+  startForegroundService(value: CallInfo): void;
+  stopForegroundService(): void;
 }
 
 // This call loads the native module object from the JSI.
-export default requireNativeModule<ReactNativeBackgroundCallModule>('ReactNativeBackgroundCall');
+export default requireNativeModule<ReactNativeBackgroundCallModule>(
+  "ReactNativeBackgroundCall"
+);
+
+export interface CallInfo {
+  title: string;
+  message: string;
+}

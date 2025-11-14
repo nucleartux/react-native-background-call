@@ -1,10 +1,19 @@
 package expo.modules.backgroundcall
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import android.os.Build
+import android.util.Log
+import androidx.core.content.PermissionChecker
 
 class ReactNativeBackgroundCallModule : Module() {
+  private val context: Context
+    get() = appContext.reactContext ?: throw IllegalStateException("React context not available")
+
+
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -14,37 +23,53 @@ class ReactNativeBackgroundCallModule : Module() {
     // The module will be accessible from `requireNativeModule('ReactNativeBackgroundCall')` in JavaScript.
     Name("ReactNativeBackgroundCall")
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
-    }
+    Function("startForegroundService") { callInfo: Map<String, Any?> ->
+      val cameraPermission =
+        PermissionChecker.checkSelfPermission(context, Manifest.permission.CAMERA)
+      val microphonePermission =
+        PermissionChecker.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+       if ((cameraPermission != PermissionChecker.PERMISSION_GRANTED) && (microphonePermission != PermissionChecker.PERMISSION_GRANTED)) {
+         Log.w("ReactNativeBackgroundCall", "CAMERA or RECORD_AUDIO permissions not granted")
+         return@Function false
+       }
+     } else {
+       if (cameraPermission != PermissionChecker.PERMISSION_GRANTED || microphonePermission != PermissionChecker.PERMISSION_GRANTED) {
+         Log.w("ReactNativeBackgroundCall", "CAMERA and RECORD_AUDIO permissions not granted")
+         return@Function false
+       }
+     }
+      try {
+        val intent = Intent(context, CallForegroundService::class.java).apply {
+          action = CallForegroundService.ACTION_START
+          putExtra("title", callInfo["title"] as? String ?: "Video Call")
+          putExtra("message", callInfo["message"] as? String ?: "Call in progress")
+        }
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ReactNativeBackgroundCallView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: ReactNativeBackgroundCallView, url: URL ->
-        view.webView.loadUrl(url.toString())
+          context.startForegroundService(intent)
+        } else {
+          context.startService(intent)
+        }
+        true
+      } catch (e: Exception) {
+        e.printStackTrace()
+        false
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+    }
+
+    Function("stopForegroundService") {
+      try {
+        val intent = Intent(context, CallForegroundService::class.java).apply {
+          action = CallForegroundService.ACTION_STOP
+        }
+        context.startService(intent)
+        true
+      } catch (e: Exception) {
+        e.printStackTrace()
+        false
+      }
     }
   }
 }
