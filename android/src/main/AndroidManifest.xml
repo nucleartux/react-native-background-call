@@ -11,7 +11,7 @@
 
     <application>
         <service
-            android:name=".VideoCallForegroundService"
+            android:name=".CallForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
